@@ -41,6 +41,7 @@ option(TRITON_ENABLE_MALI_GPU "Enable Arm Mali GPU support in server" OFF)
 set(TRITON_MIN_COMPUTE_CAPABILITY "6.0" CACHE STRING
     "The minimum CUDA compute capability supported by Triton" )
 set(TRITON_EXTRA_LIB_PATHS "" CACHE PATH "Extra library paths for Triton Server build")
+include_directories(${Protobuf_INCLUDE_DIRS})
 
 # Ensemble
 option(TRITON_ENABLE_ENSEMBLE "Include ensemble support in server" OFF)
@@ -65,7 +66,7 @@ option(TRITON_ENABLE_AZURE_STORAGE "Include Azure Storage Filesystem support in 
 option(TRITON_ENABLE_TENSORRT "Include TensorRT backend in server" OFF)
 
 # ASAN
-option(TRITON_ENABLE_ASAN "Build with address sanitizer" OFF)
+option(TRITON_ENABLE_ASAN "Build with address sanitizer" ON)
 
 # Repo tags
 set(TRITON_THIRD_PARTY_REPO_TAG "main" CACHE STRING
