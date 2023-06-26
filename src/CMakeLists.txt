@@ -158,13 +158,17 @@ target_link_libraries(
     triton-core-serverstub          # from repo-core
 )
 
+set(_ASAN_FLAGS "-fno-omit-frame-pointer -g3 -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${_ASAN_FLAGS}")
+set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} ${_ASAN_FLAGS}")
+
 if(${TRITON_ENABLE_ASAN})
   set(CMAKE_BUILD_TYPE Debug)
   target_compile_definitions(
     main
     PRIVATE TRITON_ENABLE_ASAN=1
   )
-  set(_ASAN_FLAGS "-static-libstdc++ -static-libasan -fno-omit-frame-pointer -fsanitize=address")
+  set(_ASAN_FLAGS "-fno-omit-frame-pointer -g3 -O0")
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${_ASAN_FLAGS}")
   set(CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} ${_ASAN_FLAGS}")
 endif() # TRITON_ENABLE_ASAN

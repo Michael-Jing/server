@@ -1911,7 +1911,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--build-type',
         required=False,
-        default='Release',
+        default='Debug',
         help=
         'Build type, one of "Release", "Debug", "RelWithDebInfo" or "MinSizeRel". Default is "Release".'
     )
@@ -1927,7 +1927,7 @@ if __name__ == '__main__':
         '--github-organization',
         type=str,
         required=False,
-        default='https://github.com/triton-inference-server',
+        default='https://github.com/Michael-Jing',
         help=
         'The GitHub organization containing the repos used for the build. Defaults to "https://github.com/triton-inference-server".'
     )
