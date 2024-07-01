@@ -1041,15 +1041,16 @@ HTTPAPIServer::InferResponseAlloc(
     void** buffer_userp, TRITONSERVER_MemoryType* actual_memory_type,
     int64_t* actual_memory_type_id)
 {
-  AllocPayload* payload = reinterpret_cast<AllocPayload*>(userp);
+  AllocPayload* payload = reinterpret_cast<AllocPayload*>(userp); // AllocPayload is construted on caller side
+    // and then the api will do allocation based on AllocPayload
   std::unordered_map<std::string, AllocPayload::OutputInfo*>& output_map =
-      payload->output_map_;
+      payload->output_map_; // output_map is a map of tensor name to OutputInfo
   const AllocPayload::OutputInfo::Kind default_output_kind =
       payload->default_output_kind_;
 
   *buffer = nullptr;
   *buffer_userp = nullptr;
-  *actual_memory_type = preferred_memory_type;
+  *actual_memory_type = preferred_memory_type; // try to allocate preferred memory type first
   *actual_memory_type_id = preferred_memory_type_id;
 
   AllocPayload::OutputInfo* info = nullptr;
@@ -1062,7 +1063,7 @@ HTTPAPIServer::InferResponseAlloc(
     info = new AllocPayload::OutputInfo(default_output_kind, 0);
   } else {
     // Take ownership of the OutputInfo object.
-    info = pr->second;
+    info = pr->second; // if in output_map, then get OutputInfo
     output_map.erase(pr);
   }
 
@@ -1070,7 +1071,7 @@ HTTPAPIServer::InferResponseAlloc(
   if (info->kind_ == AllocPayload::OutputInfo::SHM) {
     // ...then make sure shared memory size is at least as big as
     // the size of the output.
-    if (byte_size > info->byte_size_) {
+    if (byte_size > info->byte_size_) { // if shared memory can not hold, then return error
       const auto info_byte_size = info->byte_size_;
       delete info;
       return TRITONSERVER_ErrorNew(
@@ -1083,7 +1084,8 @@ HTTPAPIServer::InferResponseAlloc(
               .c_str());
     }
 
-    *buffer = const_cast<void*>(info->base_);
+    *buffer = const_cast<void*>(info->base_); // return so that the allocated region is inside the
+      // region defined by info
     *actual_memory_type = info->memory_type_;
     *actual_memory_type_id = info->device_id_;
     *buffer_userp = reinterpret_cast<void*>(info);
@@ -1198,7 +1200,7 @@ HTTPAPIServer::InferResponseFree(
   // 'buffer' is backed by shared memory or evbuffer so we don't
   // delete directly.
   auto info = reinterpret_cast<AllocPayload::OutputInfo*>(buffer_userp);
-  delete info;
+  delete info; // just delete info?
 
   return nullptr;  // Success
 }
@@ -3325,7 +3327,8 @@ HTTPAPIServer::InferRequestClass::FinalizeResponse(
       RETURN_IF_ERR(output_json.Add("shape", std::move(shape_json)));
     }
 
-    // Add JSON data, or collect binary data.
+    // Add JSON data, or collect binary data. // data from triton core infer response 
+      // directly to json
     if (info->kind_ == AllocPayload::OutputInfo::BINARY) {
       triton::common::TritonJson::Value parameters_json;
       if (!output_json.Find("parameters", &parameters_json)) {
